@@ -121,7 +121,10 @@ function recurseCopy($src, $dst) {
             if (is_dir($src . '/' . $file)) {
                 recurseCopy($src . '/' . $file, $dst . '/' . $file);
             } else {
-                copy($src . '/' . $file, $dst . '/' . $file);
+                $success = copy($src . '/' . $file, $dst . '/' . $file);
+                if (isset($_GET['debug'])) {
+                    echo ($success ? "  ✅ " : "  ❌ Error: ") . "Copiando $file...<br>";
+                }
             }
         }
     }
