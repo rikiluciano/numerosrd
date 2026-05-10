@@ -116,14 +116,20 @@ function syncWithGithub() {
 // Funciones auxiliares para manejo de archivos
 function recurseCopy($src, $dst) {
     $dir = opendir($src);
-    @mkdir($dst);
+    @mkdir($dst, 0755, true); // Asegurar que el destino existe
+    
     while (false !== ($file = readdir($dir))) {
         if (($file != '.') && ($file != '..')) {
-            if (is_dir($src . '/' . $file)) {
-                recurseCopy($src . '/' . $file, $dst . '/' . $file);
+            $srcPath = $src . '/' . $file;
+            $dstPath = $dst . '/' . $file;
+            
+            if (is_dir($srcPath)) {
+                if (isset($_GET['debug'])) echo "📁 Entrando en carpeta: <b>$file</b>...<br>";
+                recurseCopy($srcPath, $dstPath);
             } else {
-                $success = copy($src . '/' . $file, $dst . '/' . $file);
+                $success = @copy($srcPath, $dstPath);
                 if (isset($_GET['debug'])) {
+                    $relativeFile = str_replace(__DIR__ . '/../', '', $dstPath);
                     echo ($success ? "  ✅ " : "  ❌ Error: ") . "Copiando $file...<br>";
                 }
             }

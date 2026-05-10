@@ -464,7 +464,7 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
 
   <!-- Topbar -->
   <div class="topbar">
-    <div class="topbar-brand"><span>🎰</span> Lottery RD - PRUEBA</div>
+    <!--<div class="topbar-brand"><span>🎰</span> Lottery RD</div> -->
   </div>
 
   <?php
@@ -477,11 +477,11 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
   <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr);">
     <div class="stat-card">
       <div class="stat-val" id="stat-count"><?= number_format($db->countResults()) ?></div>
-      <div class="stat-lbl">Sorteos en BDs</div>
+      <div class="stat-lbl">Sorteos en BDss</div>
     </div>
     <div class="stat-card">
       <div class="stat-val" id="stat-date"><?= htmlspecialchars($lastDateFormatted) ?></div>
-      <div class="stat-lbl">Última Fechas</div>
+      <div class="stat-lbl">Última Fechass</div>
     </div>
   </div>
 
