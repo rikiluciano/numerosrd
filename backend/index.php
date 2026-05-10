@@ -464,7 +464,7 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
 
   <!-- Topbar -->
   <div class="topbar">
-    <!--<div class="topbar-brand"><span>🎰</span> Lottery RD</div> -->
+    <div class="topbar-brand"><span>🎰</span> Lottery RD Prueba</div>
   </div>
 
   <?php
