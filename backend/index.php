@@ -481,7 +481,7 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
     </div>
     <div class="stat-card">
       <div class="stat-val" id="stat-date"><?= htmlspecialchars($lastDateFormatted) ?></div>
-      <div class="stat-lbl">Última Fecha</div>
+      <div class="stat-lbl">Última Fechas</div>
     </div>
   </div>
 
