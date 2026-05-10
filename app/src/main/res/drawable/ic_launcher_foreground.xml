@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Fondo oscuro -->
+    <path
+        android:fillColor="#0F0F1A"
+        android:pathData="M0,0 L108,0 L108,108 L0,108 Z"/>
+
+    <!-- Círculo principal (gradiente morado-azul) -->
+    <path
+        android:fillColor="#667EEA"
+        android:pathData="M54,14 A40,40 0 1,1 53.9999,14 Z"/>
+
+    <!-- Cuadrado blanco del dado -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,30 L74,30 Q78,30 78,34 L78,74 Q78,78 74,78 L34,78 Q30,78 30,74 L30,34 Q30,30 34,30 Z"/>
+
+    <!-- Punto superior izquierdo del dado -->
+    <path
+        android:fillColor="#667EEA"
+        android:pathData="M43,43 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0"/>
+
+    <!-- Punto superior derecho -->
+    <path
+        android:fillColor="#667EEA"
+        android:pathData="M65,43 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0"/>
+
+    <!-- Punto central -->
+    <path
+        android:fillColor="#F6CA44"
+        android:pathData="M54,54 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0"/>
+
+    <!-- Punto inferior izquierdo -->
+    <path
+        android:fillColor="#667EEA"
+        android:pathData="M43,65 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0"/>
+
+    <!-- Punto inferior derecho -->
+    <path
+        android:fillColor="#667EEA"
+        android:pathData="M65,65 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0"/>
+
+</vector>

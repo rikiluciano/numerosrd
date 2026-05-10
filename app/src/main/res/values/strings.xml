@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lottery Scraper RD</string>
+    <string name="app_version">v1.0.0</string>
+    <string name="server_url_hint">URL del Servidor</string>
+    <string name="error_no_connection">Sin conexión al servidor</string>
+    <string name="error_check_xampp">Verifica que tu servidor esté en línea y la URL sea correcta</string>
+    <string name="btn_retry">Reintentar</string>
+    <string name="btn_settings">Configurar URL</string>
+    <string name="settings_title">Configuración</string>
+</resources>

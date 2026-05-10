@@ -1,0 +1,31 @@
+# Archivos de Sistema
+.DS_Store
+Thumbs.db
+
+# Android Studio / IntelliJ
+.idea/
+.gradle/
+build/
+*.iml
+local.properties
+.cxx/
+.externalNativeBuild/
+captures/
+.navigation/
+
+# Android App específicos
+app/build/
+app/.cxx/
+app/release/
+app/debug/
+
+# PHP / Backend
+backend/logs/*.log
+backend/temp/
+.htaccess
+# config.php (Opcional: Si quieres mantener tus claves de DB privadas en GitHub, descomenta la linea de abajo)
+# backend/config.php
+
+# Node / Otros
+node_modules/
+npm-debug.log

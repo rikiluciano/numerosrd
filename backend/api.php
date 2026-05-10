@@ -1,0 +1,247 @@
+<?php
+/**
+ * ===================================================================
+ * API REST - Lottery Scraper RD v4.0
+ * ===================================================================
+ *
+ * Endpoints:
+ *   GET  ?action=status         → Estado del scraper
+ *   GET  ?action=results        → Últimos resultados
+ *   GET  ?action=results&date=  → Resultados por fecha
+ *   GET  ?action=stats          → Estadísticas globales
+ *   GET  ?action=logs           → Logs recientes
+ *   GET  ?action=progress       → Progreso histórico
+ *   GET  ?action=companies      → Lista de empresas
+ *   GET  ?action=firebase_test  → Test de conexión Firebase
+ *   POST ?action=reset          → Reset completo (dev only)
+ *   POST ?action=force_date     → Forzar fecha específica
+ *   POST ?action=run_cron       → Ejecutar cron manualmente
+ *   POST ?action=reset_firebase → Reset en Firebase
+ * ===================================================================
+ */
+
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/database.php';
+require_once __DIR__ . '/scraper.php';
+require_once __DIR__ . '/date_manager.php';
+require_once __DIR__ . '/firebase_config.php';
+
+// Headers CORS y JSON
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit(0);
+}
+
+$action = $_GET['action'] ?? $_POST['action'] ?? 'status';
+
+try {
+    $db          = new LotteryDB();
+    $dateManager = new DateManager($db);
+    $firebase    = new FirebaseSync($db);
+
+    switch ($action) {
+
+        // ── Estado general ───────────────────────────────────────────
+        case 'status':
+            $state    = $db->getState();
+            $progress = $dateManager->getProgress();
+            $next     = $dateManager->getNextDateToProcess();
+
+            echo json_encode([
+                'success'    => true,
+                'app_name'   => APP_NAME,
+                'version'    => APP_VERSION,
+                'env'        => APP_ENV,
+                'timestamp'  => getRDTimestamp(),
+                'timezone'   => 'America/Santo_Domingo',
+                'state'      => $state,
+                'progress'   => $progress,
+                'next_date'  => $next,
+                'total_results' => $db->countResults(),
+                'companies_count' => count($db->getCompanies()),
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            break;
+
+        // ── Resultados ───────────────────────────────────────────────
+        case 'results':
+            $date        = $_GET['date'] ?? null;
+            $companySlug = $_GET['company'] ?? null;
+            $limit       = min((int)($_GET['limit'] ?? 100), 500);
+
+            if ($date) {
+                $results = $db->getResultsByDateGrouped($date);
+                echo json_encode([
+                    'success' => true,
+                    'date'    => $date,
+                    'count'   => array_sum(array_map(fn($c) => count($c['draws']), $results)),
+                    'data'    => $results,
+                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            } else {
+                $results = $db->getResults($limit, null, $companySlug);
+                echo json_encode([
+                    'success' => true,
+                    'count'   => count($results),
+                    'data'    => $results,
+                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            }
+            break;
+
+        // ── Progreso histórico ───────────────────────────────────────
+        case 'progress':
+            echo json_encode([
+                'success'  => true,
+                'progress' => $dateManager->getProgress(),
+                'pending'  => $dateManager->getPendingDates(20),
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            break;
+
+        // ── Estadísticas ─────────────────────────────────────────────
+        case 'stats':
+            $state = $db->getState();
+            echo json_encode([
+                'success'    => true,
+                'stats'      => [
+                    'total_results'   => $db->countResults(),
+                    'total_extracted' => $state['total_extracted'] ?? 0,
+                    'total_saved'     => $state['total_saved'] ?? 0,
+                    'total_errors'    => $state['total_errors'] ?? 0,
+                    'duplicates_avoided' => $state['duplicates_avoided'] ?? 0,
+                    'last_date'       => $state['last_processed_date'] ?? 'N/A',
+                    'current_mode'    => $state['current_mode'] ?? 'historical',
+                    'is_running'      => (bool)($state['is_running'] ?? false),
+                    'is_paused'       => (bool)($state['is_paused'] ?? false),
+                ],
+                'companies'  => $db->getCompanies(),
+                'timestamp'  => getRDTimestamp(),
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            break;
+
+        // ── Logs ─────────────────────────────────────────────────────
+        case 'logs':
+            $limit = min((int)($_GET['limit'] ?? 30), 200);
+            echo json_encode([
+                'success' => true,
+                'logs'    => $db->getLogs($limit),
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            break;
+
+        // ── Historial (Empresa o Sorteo) ─────────────────────────────
+        case 'history':
+            $companySlug = $_GET['company'] ?? null;
+            $drawName    = $_GET['draw'] ?? null;
+            $limit       = min((int)($_GET['limit'] ?? 10), 50);
+
+            $data = $db->getHistory($limit, $companySlug, $drawName);
+            echo json_encode([
+                'success' => true,
+                'count'   => count($data),
+                'data'    => $data,
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            break;
+
+        // ── Empresas ─────────────────────────────────────────────────
+        case 'companies':
+            echo json_encode([
+                'success'   => true,
+                'companies' => $db->getCompanies(),
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            break;
+
+        // ── Test Firebase ────────────────────────────────────────────
+        case 'firebase_test':
+            echo json_encode([
+                'success' => true,
+                'result'  => $firebase->testConnection(),
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            break;
+
+        // ── Forzar fecha ─────────────────────────────────────────────
+        case 'force_date':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                http_response_code(405);
+                echo json_encode(['success' => false, 'error' => 'Método no permitido']);
+                break;
+            }
+            $forceDate = $_POST['date'] ?? $_GET['date'] ?? null;
+            if (!$forceDate) {
+                echo json_encode(['success' => false, 'error' => 'Parámetro date requerido']);
+                break;
+            }
+            $result = $dateManager->forceDate($forceDate);
+            echo json_encode($result, JSON_PRETTY_PRINT);
+            break;
+
+        // ── Ejecutar cron manualmente ────────────────────────────────
+        case 'run_cron':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                http_response_code(405);
+                echo json_encode(['success' => false, 'error' => 'Método no permitido']);
+                break;
+            }
+            $token = $_POST['token'] ?? $_GET['token'] ?? '';
+            if ($token !== CRON_TOKEN) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'error' => 'Token inválido']);
+                break;
+            }
+            // Redirigir al cronjob
+            include __DIR__ . '/cronjob.php';
+            break;
+
+        // ── Reset Local (dev only) ───────────────────────────────────
+        case 'reset':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                http_response_code(405);
+                echo json_encode(['success' => false, 'error' => 'Método no permitido']);
+                break;
+            }
+            if (APP_ENV === 'production') {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'error' => 'Reset no permitido en producción']);
+                break;
+            }
+            $deleted = $db->resetAll();
+            systemLog("⚠️ RESET COMPLETO ejecutado", 'warning');
+            echo json_encode([
+                'success'   => true,
+                'message'   => 'Base de datos local reseteada',
+                'deleted'   => $deleted,
+                'timestamp' => getRDTimestamp(),
+            ], JSON_PRETTY_PRINT);
+            break;
+
+        // ── Reset Firebase ────────────────────────────────────────────
+        case 'reset_firebase':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                http_response_code(405);
+                echo json_encode(['success' => false, 'error' => 'Método no permitido']);
+                break;
+            }
+            $result = $firebase->resetAll();
+            echo json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            break;
+
+        // ── Default ───────────────────────────────────────────────────
+        default:
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'error'   => "Acción desconocida: {$action}",
+                'valid_actions' => ['status', 'results', 'stats', 'logs', 'progress', 'companies',
+                                    'firebase_test', 'force_date', 'run_cron', 'reset', 'reset_firebase'],
+            ]);
+    }
+
+} catch (\Exception $e) {
+    http_response_code(500);
+    systemLog("API Error: " . $e->getMessage(), 'error');
+    echo json_encode([
+        'success' => false,
+        'error'   => $e->getMessage(),
+        'trace'   => APP_ENV !== 'production' ? $e->getTraceAsString() : null,
+    ], JSON_PRETTY_PRINT);
+}

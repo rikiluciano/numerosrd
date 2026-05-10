@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Colores principales del sistema -->
+    <color name="color_primary">#667EEA</color>
+    <color name="color_primary_dark">#4C5FC7</color>
+    <color name="color_secondary">#764BA2</color>
+    <color name="color_accent">#F6CA44</color>
+
+    <!-- Fondos -->
+    <color name="bg_dark">#0F0F1A</color>
+    <color name="bg_card">#1A1A2E</color>
+    <color name="toolbar_bg">#13131F</color>
+    <color name="splash_bg">#0F0F1A</color>
+
+    <!-- Texto -->
+    <color name="white">#FFFFFF</color>
+    <color name="white_70">#B3FFFFFF</color>
+    <color name="white_50">#80FFFFFF</color>
+
+    <!-- UI Components -->
+    <color name="chip_bg">#2A2A40</color>
+    <color name="info_bg">#1E1E35</color>
+
+    <!-- Loterías -->
+    <color name="lottery_nacional">#53CA5F</color>
+    <color name="lottery_leidsa">#FFC81C</color>
+    <color name="lottery_real">#182882</color>
+    <color name="lottery_loteka">#00B1DD</color>
+    <color name="lottery_americanas">#3C3B6E</color>
+    <color name="lottery_primera">#E73A43</color>
+    <color name="lottery_suerte">#2D2D83</color>
+    <color name="lottery_lotedom">#0009CD</color>
+    <color name="lottery_anguila">#EE6F3A</color>
+    <color name="lottery_king">#00569C</color>
+</resources>
