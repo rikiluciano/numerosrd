@@ -50,11 +50,12 @@ function syncWithGithub() {
 
         // 2. Leer versión local
         $localData = file_exists($versionFile) ? json_decode(file_get_contents($versionFile), true) : ['commit' => ''];
+        $force = isset($_GET['force']);
         
-        if (isset($_GET['debug'])) echo "🏠 Versión local: " . ($localData['commit'] ?: 'Ninguna') . "<br>";
+        if (isset($_GET['debug'])) echo "🏠 Versión local: " . ($localData['commit'] ?: 'Ninguna') . ($force ? " (MODO FORZADO ACTIVO)" : "") . "<br>";
 
-        // 3. Si es la misma, no hacer nada
-        if ($localData['commit'] === $latestCommit) {
+        // 3. Si es la misma, no hacer nada (a menos que se use force)
+        if ($localData['commit'] === $latestCommit && !$force) {
             if (isset($_GET['debug'])) echo "✨ Ya estás en la última versión.<br>";
             return true; 
         }
