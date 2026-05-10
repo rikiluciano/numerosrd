@@ -51,11 +51,12 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
     }
 
     body {
-      background: var(--bg);
-      color: var(--text);
+      background-color: #0f172a;
+      color: #e2e8f0;
       font-family: 'Inter', sans-serif;
-      line-height: 1.6;
-      overflow-x: hidden
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
     }
 
     .app-container {

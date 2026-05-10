@@ -8,7 +8,19 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// --- EJECUCIÓN DIRECTA ---
 if (php_sapi_name() === 'cli' || isset($_GET['debug'])) {
+    if (isset($_GET['check'])) {
+        $file = dirname(__DIR__) . '/' . $_GET['check'];
+        if (file_exists($file)) {
+            echo "📄 <b>Verificando archivo:</b> " . $_GET['check'] . "<br>";
+            echo "<pre>" . htmlspecialchars(substr(file_get_contents($file), 0, 1000)) . "</pre>";
+        } else {
+            echo "❌ El archivo no existe en: $file";
+        }
+        exit;
+    }
+    
     $result = syncWithGithub();
     if (isset($_GET['debug'])) {
         echo $result ? "<br>🏁 <b>ACTUALIZACIÓN EXITOSA</b>. Revisa tu web ahora." : "<br>🏁 <b>AVISO:</b> Sin cambios o error.";
