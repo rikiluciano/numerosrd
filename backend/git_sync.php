@@ -1,150 +1,116 @@
 <?php
 /**
  * ===================================================================
- * GIT SYNC - Sistema de Auto-Actualización Silenciosa
+ * GIT SYNC - Sistema de Auto-Actualización Silenciosa (VERSIÓN 2.0)
  * ===================================================================
  */
 
-// --- EJECUCIÓN DIRECTA (Para Cron o Debug) ---
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// --- EJECUCIÓN DIRECTA ---
 if (php_sapi_name() === 'cli' || isset($_GET['debug'])) {
     $result = syncWithGithub();
     if (isset($_GET['debug'])) {
-        echo $result ? "✅ Actualización completada con éxito." : "❌ La actualización falló o no hay cambios nuevos.";
+        echo $result ? "<br>🏁 <b>¡ÉXITO!</b> Sistema actualizado." : "<br>🏁 <b>AVISO:</b> No hubo cambios o ocurrió un error.";
     }
 }
 
 function syncWithGithub() {
-    // --- CONFIGURACIÓN ---
     $repoUser = "rikiluciano"; 
     $repoName = "numerosrd";    
     $branch   = "main";
+    $token    = "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";
     $versionFile = __DIR__ . '/version.json';
     
-    if (isset($_GET['debug'])) echo "🔍 Iniciando sincronización con $repoUser/$repoName...<br>";
+    if (isset($_GET['debug'])) echo "🚀 <b>Iniciando Sincronización...</b><br>";
 
-    // 1. Obtener última versión (commit) de GitHub via API
-    $token = "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"; 
     $opts = [
         "http" => [
             "method" => "GET",
-            "header" => [
-                "User-Agent: PHP-AutoUpdate",
-                "Authorization: token $token"
-            ]
+            "header" => ["User-Agent: PHP-AutoUpdate", "Authorization: token $token"]
         ]
     ];
     $context = stream_context_create($opts);
-    $apiUrl = "https://api.github.com/repos/$repoUser/$repoName/commits/$branch";
     
-    try {
-        $response = @file_get_contents($apiUrl, false, $context);
-        if (!$response) {
-            if (isset($_GET['debug'])) echo "❌ Error: No se pudo conectar con la API de GitHub.<br>";
-            return false;
-        }
-        
-        $githubData = json_decode($response, true);
-        $latestCommit = $githubData['sha'];
-        
-        if (isset($_GET['debug'])) echo "📦 Último commit en GitHub: $latestCommit<br>";
+    // 1. Obtener Commit
+    $apiUrl = "https://api.github.com/repos/$repoUser/$repoName/commits/$branch";
+    $response = @file_get_contents($apiUrl, false, $context);
+    if (!$response) return false;
+    $githubData = json_decode($response, true);
+    $latestCommit = $githubData['sha'];
 
-        // 2. Leer versión local
-        $localData = file_exists($versionFile) ? json_decode(file_get_contents($versionFile), true) : ['commit' => ''];
-        $force = isset($_GET['force']);
-        
-        if (isset($_GET['debug'])) echo "🏠 Versión local: " . ($localData['commit'] ?: 'Ninguna') . ($force ? " (MODO FORZADO ACTIVO)" : "") . "<br>";
+    // 2. Comprobar versión
+    $localData = file_exists($versionFile) ? json_decode(file_get_contents($versionFile), true) : ['commit' => ''];
+    $force = isset($_GET['force']);
+    
+    if (isset($_GET['debug'])) echo "📦 Commit GitHub: <code>$latestCommit</code><br>🏠 Commit Local: <code>" . ($localData['commit'] ?: 'Ninguno') . "</code>" . ($force ? " [MODO FORZADO]" : "") . "<br>";
 
-        // 3. Si es la misma, no hacer nada (a menos que se use force)
-        if ($localData['commit'] === $latestCommit && !$force) {
-            if (isset($_GET['debug'])) echo "✨ Ya estás en la última versión.<br>";
-            return true; 
-        }
-        
-        // 4. ¡HAY ACTUALIZACIÓN! Descargar ZIP via API
-        $zipUrl = "https://api.github.com/repos/$repoUser/$repoName/zipball/$branch";
-        $zipFile = __DIR__ . "/temp_update.zip";
-        
-        if (isset($_GET['debug'])) echo "📥 Descargando actualización...<br>";
-        $zipContent = @file_get_contents($zipUrl, false, $context);
-        if (!$zipContent) {
-            if (isset($_GET['debug'])) echo "❌ Error: No se pudo descargar el archivo ZIP.<br>";
-            return false;
-        }
-        
-        file_put_contents($zipFile, $zipContent);
-        
-        // 5. Extraer y Sobrescribir
-        if (!class_exists('ZipArchive')) {
-            if (isset($_GET['debug'])) echo "❌ Error: La extensión ZipArchive no está habilitada en este hosting.<br>";
-            return false;
-        }
+    if ($localData['commit'] === $latestCommit && !$force) return true;
 
-        $zip = new ZipArchive;
-        if ($zip->open($zipFile) === TRUE) {
-            if (isset($_GET['debug'])) echo "📂 Extrayendo archivos...<br>";
-            $extractPath = __DIR__ . "/../";
-            $tempFolder = __DIR__ . "/temp_extract/";
-            @mkdir($tempFolder);
-            $zip->extractTo($tempFolder);
-            $zip->close();
-            
-            $subdirs = glob($tempFolder . '*', GLOB_ONLYDIR);
-            if (!empty($subdirs)) {
-                $innerFolder = $subdirs[0] . '/';
-                recurseCopy($innerFolder, $extractPath);
-                if (isset($_GET['debug'])) echo "🚀 Archivos actualizados correctamente.<br>";
-            }
-            
-            deleteDir($tempFolder);
-            unlink($zipFile);
-            
-            file_put_contents($versionFile, json_encode([
-                'commit' => $latestCommit,
-                'date' => date('Y-m-d H:i:s'),
-                'author' => $githubData['commit']['author']['name']
-            ]));
-            
-            return true;
-        }
-    } catch (Exception $e) {
-        if (isset($_GET['debug'])) echo "❌ Error crítico: " . $e->getMessage() . "<br>";
+    // 3. Descargar y Extraer
+    if (isset($_GET['debug'])) echo "📥 Descargando ZIP...<br>";
+    $zipUrl = "https://api.github.com/repos/$repoUser/$repoName/zipball/$branch";
+    $zipContent = @file_get_contents($zipUrl, false, $context);
+    if (!$zipContent) return false;
+    
+    $zipFile = __DIR__ . "/temp_update.zip";
+    file_put_contents($zipFile, $zipContent);
+
+    if (!class_exists('ZipArchive')) {
+        if (isset($_GET['debug'])) echo "❌ Error: ZipArchive no habilitado.<br>";
         return false;
+    }
+
+    $zip = new ZipArchive;
+    if ($zip->open($zipFile) === TRUE) {
+        $tempFolder = __DIR__ . "/temp_extract/";
+        if (!is_dir($tempFolder)) mkdir($tempFolder, 0755, true);
+        $zip->extractTo($tempFolder);
+        $zip->close();
+        
+        $subdirs = glob($tempFolder . '*', GLOB_ONLYDIR);
+        if (!empty($subdirs)) {
+            $innerFolder = $subdirs[0];
+            if (isset($_GET['debug'])) echo "📂 Extrayendo archivos de: <code>$innerFolder</code><br>";
+            
+            // EL SECRETO: El destino es un nivel arriba de 'backend'
+            $rootDest = dirname(__DIR__); 
+            recurseCopy($innerFolder, $rootDest);
+        }
+        
+        // Limpieza
+        deleteDir($tempFolder);
+        unlink($zipFile);
+        
+        file_put_contents($versionFile, json_encode(['commit' => $latestCommit, 'date' => date('Y-m-d H:i:s')]));
+        return true;
     }
     return false;
 }
 
-// Funciones auxiliares para manejo de archivos
 function recurseCopy($src, $dst) {
     $dir = opendir($src);
-    @mkdir($dst, 0755, true); // Asegurar que el destino existe
-    
+    if (!is_dir($dst)) @mkdir($dst, 0755, true);
     while (false !== ($file = readdir($dir))) {
         if (($file != '.') && ($file != '..')) {
-            $srcPath = $src . '/' . $file;
-            $dstPath = $dst . '/' . $file;
-            
-            if (is_dir($srcPath)) {
-                if (isset($_GET['debug'])) echo "📁 Entrando en carpeta: <b>$file</b>...<br>";
-                recurseCopy($srcPath, $dstPath);
+            if (is_dir($src . '/' . $file)) {
+                if (isset($_GET['debug'])) echo "📁 Carpeta: <b>$file</b><br>";
+                recurseCopy($src . '/' . $file, $dst . '/' . $file);
             } else {
-                $success = @copy($srcPath, $dstPath);
-                if (isset($_GET['debug'])) {
-                    $relativeFile = str_replace(__DIR__ . '/../', '', $dstPath);
-                    echo ($success ? "  ✅ " : "  ❌ Error: ") . "Copiando $file...<br>";
-                }
+                $success = @copy($src . '/' . $file, $dst . '/' . $file);
+                if (isset($_GET['debug'])) echo ($success ? "  ✅" : "  ❌") . " $file<br>";
             }
         }
     }
     closedir($dir);
 }
 
-function deleteDir($dirPath) {
-    if (!is_dir($dirPath)) return;
-    if (substr($dirPath, strlen($dirPath) - 1, 1) != '/') $dirPath .= '/';
-    $files = glob($dirPath . '*', GLOB_MARK);
+function deleteDir($dir) {
+    if (!is_dir($dir)) return;
+    $files = array_diff(scandir($dir), array('.','..'));
     foreach ($files as $file) {
-        if (is_dir($file)) deleteDir($file);
-        else unlink($file);
+        (is_dir("$dir/$file")) ? deleteDir("$dir/$file") : unlink("$dir/$file");
     }
-    rmdir($dirPath);
+    return rmdir($dir);
 }
