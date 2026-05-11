@@ -110,8 +110,8 @@ try {
                 foreach ($results as $slug => &$comp) {
                     foreach ($comp['draws'] as &$d) {
                         $logoUrl = getLogoUrl($slug, $d['drawName']);
-                        $logoHtml = $logoUrl ? "<img src='{$logoUrl}' style='max-width:60px; max-height:25px; object-fit:contain; position:absolute; top:12px; right:12px;' alt='logo'>" : "";
-                        $d['drawTime'] = "<style>.draw-time { font-size: 0 !important; } .draw-time-content { font-size: 13px !important; color: #A0AEC0; }</style><span class='draw-time-content'>📅 {$formattedDate}</span>{$logoHtml}";
+                        $logoHtml = $logoUrl ? "<img src='{$logoUrl}' style='max-width:60px; max-height:25px; object-fit:contain; float:right;' alt='logo'>" : "";
+                        $d['drawTime'] = "<style>.draw-time { font-size: 0 !important; } .draw-time-content { font-size: 13px !important; color: #A0AEC0; }</style><div style='width:100%; display:inline-block; margin-bottom:8px;'><span class='draw-time-content'>📅 {$formattedDate}</span>{$logoHtml}</div>";
                         
                         $celestial = ['special1', 'special2', 'special3', 'normal', 'normal', 'normal', 'normal'];
                         $newTypes = [];
