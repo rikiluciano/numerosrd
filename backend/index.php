@@ -724,40 +724,52 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
         container.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><p>Sin resultados para esta fecha</p></div>';
         return;
       }
-      
+
       const p = (fullDateStr || '').split('-');
       const formattedDate = p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : fullDateStr;
+      const celestial = ['special1', 'special2', 'special3', 'normal', 'normal', 'normal'];
 
-      container.innerHTML = Object.entries(data).map(([slug, comp]) => `
-    <div class="company-card">
-      <div class="company-header" onclick="showHistory('company', '${slug}', '${comp.company.name}')">
-        <div class="company-dot" style="background:${comp.company.color}"></div>
-        <div class="company-name">${comp.company.name}</div>
-        <small style="color:var(--muted)">${comp.draws.length} sorteos ❯</small>
-      </div>
-      <div class="draws-grid">
-        ${comp.draws.map(d => {
+      let html = '';
+      for (const [slug, comp] of Object.entries(data)) {
+        const safeSlug = encodeURIComponent(slug);
+        const safeName = encodeURIComponent(comp.company.name);
+        html += `<div class="company-card">`;
+        html += `<div class="company-header" data-action="company" data-slug="${safeSlug}" data-name="${safeName}">`;
+        html += `<div class="company-dot" style="background:${comp.company.color}"></div>`;
+        html += `<div class="company-name">${comp.company.name}</div>`;
+        html += `<small style="color:var(--muted)">${comp.draws.length} sorteos ❯</small>`;
+        html += `</div><div class="draws-grid">`;
+
+        for (const d of comp.draws) {
           const logoUrl = getLogo(slug, d.drawName);
           const logoHtml = logoUrl ? `<img src="${logoUrl}" class="draw-logo" alt="logo" loading="lazy">` : '';
-          return `
-          <div class="draw-block" onclick="event.stopPropagation(); showHistory('draw', '${slug}', '${d.drawName}')">
-            <div class="draw-header">
-              <div class="draw-name">${d.drawName}</div>
-              ${logoHtml}
-            </div>
-            <div class="draw-time">📅 ${formattedDate}</div>
-            <div class="numbers-row">
-              ${(d.numbers || []).map((n, i) => {
-        const colors = ['special1', 'special2', 'special3', 'normal', 'normal', 'normal'];
-        let t = (d.numberTypes || [])[i];
-        if (!t || t === 'normal') t = colors[i % colors.length];
-        return \`<div class="num-ball num-\${t}">\${String(n).padStart(2, '0')}</div>\`;
-      }).join('')}
-            </div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>`).join('');
+          const safeDrawName = encodeURIComponent(d.drawName);
+
+          html += `<div class="draw-block" data-action="draw" data-slug="${safeSlug}" data-name="${safeDrawName}">`;
+          html += `<div class="draw-header"><div class="draw-name">${d.drawName}</div>${logoHtml}</div>`;
+          html += `<div class="draw-time">📅 ${formattedDate}</div>`;
+          html += `<div class="numbers-row">`;
+          (d.numbers || []).forEach((n, i) => {
+            let t = (d.numberTypes || [])[i];
+            if (!t || t === 'normal') t = celestial[i % celestial.length];
+            html += `<div class="num-ball num-${t}">${String(n).padStart(2, '0')}</div>`;
+          });
+          html += `</div></div>`;
+        }
+        html += `</div></div>`;
+      }
+      container.innerHTML = html;
+
+      // Event delegation: safe click handling with no inline JS
+      container.querySelectorAll('[data-action]').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const action = el.dataset.action;
+          const slug = decodeURIComponent(el.dataset.slug);
+          const name = decodeURIComponent(el.dataset.name);
+          showHistory(action, slug, name);
+        });
+      });
     }
 
     // Calendario
