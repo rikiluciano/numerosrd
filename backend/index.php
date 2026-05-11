@@ -51,7 +51,7 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
     }
 
     body {
-      background-color: #1e1b4b;
+      background-color: #0a0a0c;
       color: #e2e8f0;
       font-family: 'Inter', sans-serif;
       margin: 0;
@@ -465,7 +465,7 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
 
   <!-- Topbar -->
   <div class="topbar">
-    <div class="topbar-brand"><span>🎰</span> Lottery RD Prueba</div>
+    <div class="topbar-brand"><span>🎰</span> Lottery RD</div>
   </div>
 
   <?php
