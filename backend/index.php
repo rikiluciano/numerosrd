@@ -39,7 +39,7 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
       --border: #2E2E2E;
       --p: #3291FF;
       --r: 20px;
-      --shadow: 0 8px 30px rgba(0,0,0,0.5);
+      --shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
     }
 
     * {
@@ -135,11 +135,11 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
       text-align: center;
       transition: transform .2s, box-shadow .2s;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
 
     .stat-card:hover {
-      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
     }
 
     .stat-card:active {
@@ -231,10 +231,24 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
       height: 12px;
       border-radius: 50%;
       flex-shrink: 0;
-      box-shadow: 0 0 10px rgba(255,255,255,0.2);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
     }
 
-    .company-name {
+    .draw-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .draw-logo {
+      max-width: 60px;
+      max-height: 25px;
+      object-fit: contain;
+      margin-left: 8px;
+    }
+
+    .draw-name {
       font-weight: 700;
       font-size: 1.05rem;
       flex: 1;
@@ -292,11 +306,11 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
       font-weight: 800;
       font-size: 1rem;
       flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.05);
       transition: transform 0.2s;
     }
-    
+
     .num-ball:hover {
       transform: scale(1.1);
     }
@@ -304,19 +318,19 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
     .num-special1 {
       background: linear-gradient(135deg, #FFD700, #F59E0B);
       color: #451A03;
-      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4), inset 0 2px 2px rgba(255,255,255,0.5);
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4), inset 0 2px 2px rgba(255, 255, 255, 0.5);
     }
 
     .num-special2 {
       background: linear-gradient(135deg, #38BDF8, #3B82F6);
       color: #FFFFFF;
-      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4), inset 0 2px 2px rgba(255,255,255,0.3);
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4), inset 0 2px 2px rgba(255, 255, 255, 0.3);
     }
 
     .num-special3 {
       background: linear-gradient(135deg, #34D399, #10B981);
       color: #022C22;
-      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4), inset 0 2px 2px rgba(255,255,255,0.4);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4), inset 0 2px 2px rgba(255, 255, 255, 0.4);
     }
 
     .num-normal {
@@ -381,8 +395,15 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: .4; }
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: .4;
+      }
     }
 
     .fade-out {
@@ -463,8 +484,15 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
     }
 
     @keyframes slideIn {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* Minimalist Footer */
@@ -484,7 +512,7 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
       padding: 10px 24px;
       border-radius: 30px;
       border: 1px solid var(--border);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     }
 
     .footer-content strong {
@@ -505,11 +533,13 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
       .draws-grid {
         grid-template-columns: 1fr;
       }
+
       .footer-content {
         flex-direction: column;
         gap: 6px;
         padding: 14px 24px;
       }
+
       .footer-dot {
         display: none;
       }
@@ -649,7 +679,7 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
 
         if (d.success) {
           document.getElementById('resultsDateLabel').textContent = formatDate(date);
-          renderResults(d.data || {}, container);
+          renderResults(d.data || {}, container, date);
         }
       } catch (e) {
         toast('❌ Error de conexión', false);
@@ -658,11 +688,46 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
       }
     }
 
-    function renderResults(data, container) {
+    const getLogo = (companySlug, drawName) => {
+        if (companySlug === 'leidsa' && drawName === 'Loto Pool') return 'https://cdn-lottery.kiskoo.com/b9f95bbf6087f617f58efb5078ca5898.png';
+        let filename = '';
+        if (companySlug === 'loto-real' && drawName === 'Loto Pool') filename = 'loto pool real';
+        else if (drawName === 'Juega + Pega +') filename = 'juega-mas-pega-mas';
+        else if (drawName === 'Gana Más') filename = 'gana-mas';
+        else if (drawName === 'Lotería Nacional') filename = 'loteria-nacional';
+        else if (drawName === 'Pega 3 Más') filename = 'pega-3-mas';
+        else if (drawName === 'Quiniela Leidsa') filename = 'quiniela-leidsa';
+        else if (drawName === 'Super Kino TV') filename = 'super-kino';
+        else if (drawName === 'Loto - Super Loto Más') filename = 'loto-leidsa';
+        else if (drawName === 'Quiniela Real') filename = 'loteria-real';
+        else if (drawName === 'Loto Real') filename = 'loto-real';
+        else if (drawName === 'Loto Pool Noche') filename = 'loto-pool-noche';
+        else if (drawName === 'Quiniela Loteka') filename = 'quiniela-loteka';
+        else if (drawName === 'Mega Chances') filename = 'mega-chances';
+        else if (drawName === 'MegaLotto') filename = 'mega-lotto-loteka';
+        else if (drawName === 'Florida Día') filename = 'florida-dia';
+        else if (drawName === 'Florida Noche') filename = 'florida-noche';
+        else if (drawName === 'New York Tarde') filename = 'new-york-tarde';
+        else if (drawName === 'New York Noche') filename = 'new-york-noche';
+        else if (drawName === 'La Primera Día') filename = 'la-primera-dia';
+        else if (drawName === 'Primera Noche') filename = 'la-primera-noche';
+        else if (drawName.includes('La Suerte')) filename = 'la-suerte-dominicana';
+        else if (drawName === 'Quiniela LoteDom') filename = 'quiniela-lotedom';
+        else if (drawName === 'El Quemaito Mayor') filename = 'el-quemaito-mayor';
+        else if (drawName.includes('Anguila')) filename = 'anguila-lottery';
+        else if (drawName.includes('King Lottery')) filename = 'king-lottery';
+        return filename ? `https://cdn-lottery.kiskoo.com/loterias-dominicanas/${filename}.png` : '';
+    };
+
+    function renderResults(data, container, fullDateStr) {
       if (!Object.keys(data).length) {
         container.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><p>Sin resultados para esta fecha</p></div>';
         return;
       }
+      
+      const p = (fullDateStr || '').split('-');
+      const formattedDate = p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : fullDateStr;
+
       container.innerHTML = Object.entries(data).map(([slug, comp]) => `
     <div class="company-card">
       <div class="company-header" onclick="showHistory('company', '${slug}', '${comp.company.name}')">
@@ -671,17 +736,26 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
         <small style="color:var(--muted)">${comp.draws.length} sorteos ❯</small>
       </div>
       <div class="draws-grid">
-        ${comp.draws.map(d => `
+        ${comp.draws.map(d => {
+          const logoUrl = getLogo(slug, d.drawName);
+          const logoHtml = logoUrl ? `<img src="${logoUrl}" class="draw-logo" alt="logo" loading="lazy">` : '';
+          return `
           <div class="draw-block" onclick="event.stopPropagation(); showHistory('draw', '${slug}', '${d.drawName}')">
-            <div class="draw-name">${d.drawName}</div>
-            ${d.drawTime ? `<div class="draw-time">⏰ ${d.drawTime}</div>` : ''}
+            <div class="draw-header">
+              <div class="draw-name">${d.drawName}</div>
+              ${logoHtml}
+            </div>
+            <div class="draw-time">📅 ${formattedDate}</div>
             <div class="numbers-row">
               ${(d.numbers || []).map((n, i) => {
-        const t = (d.numberTypes || [])[i] || 'normal';
-        return `<div class="num-ball num-${t}">${String(n).padStart(2, '0')}</div>`;
+        const colors = ['special1', 'special2', 'special3', 'normal', 'normal', 'normal'];
+        let t = (d.numberTypes || [])[i];
+        if (!t || t === 'normal') t = colors[i % colors.length];
+        return \`<div class="num-ball num-\${t}">\${String(n).padStart(2, '0')}</div>\`;
       }).join('')}
             </div>
-          </div>`).join('')}
+          </div>`;
+        }).join('')}
       </div>
     </div>`).join('');
     }
@@ -783,9 +857,9 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
   </script>
   <footer class="app-footer">
     <div class="footer-content">
-      <span>Desarrollado por <strong>Rlabs</strong></span>
+      <span>Desarrollado por <strong>RLabs</strong></span>
       <span class="footer-dot">•</span>
-      <span>&copy; 2026 Todos los derechos reservados</span>
+      <span>&copy; <?= date('Y') ?> Todos los derechos reservados</span>
     </div>
   </footer>
 </body>
