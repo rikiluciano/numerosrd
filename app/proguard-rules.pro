@@ -1,7 +1,7 @@
 # Add project specific ProGuard rules here.
 # You can control the set of applied configuration files using the
 # proguardFiles setting in build.gradle.
--keep class com.lotteryrd.scraper.WebAppBridge { *; }
--keepclassmembers class com.lotteryrd.scraper.WebAppBridge {
+-keep class com.rlabs.lotteryapp.WebAppBridge { *; }
+-keepclassmembers class com.rlabs.lotteryapp.WebAppBridge {
     @android.webkit.JavascriptInterface <methods>;
 }

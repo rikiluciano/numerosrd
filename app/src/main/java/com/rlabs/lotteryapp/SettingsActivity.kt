@@ -1,11 +1,11 @@
-package com.lotteryrd.scraper
+package com.rlabs.lotteryapp
 
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.lotteryrd.scraper.databinding.ActivitySettingsBinding
+import com.rlabs.lotteryapp.databinding.ActivitySettingsBinding
 
 /**
  * SettingsActivity — Configuración de la URL del servidor PHP

@@ -24,134 +24,149 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-  <title>Lottery Scraper RD – Dashboard</title>
+  <title>LotteryApp – Dashboard</title>
   <meta name="description" content="Sistema inteligente de extracción de resultados de loterías dominicanas con IA">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet">
   <style>
     :root {
-      --p: #667eea;
-      --s: #764ba2;
-      --a: #f6ca44;
-      --bg: #0f0f1a;
-      --card: #1a1a2e;
-      --card2: #16213e;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --border: #2d2d4a;
-      --r: 14px;
-      --shadow: 0 8px 32px rgba(0, 0, 0, .4)
+      --bg: #0A0A0A;
+      --card: #141414;
+      --card2: #1C1C1C;
+      --text: #EDEDED;
+      --muted: #A0A0A0;
+      --border: #2E2E2E;
+      --p: #3291FF;
+      --r: 20px;
+      --shadow: 0 8px 30px rgba(0,0,0,0.5);
     }
 
     * {
       margin: 0;
       padding: 0;
-      box-sizing: border-box
+      box-sizing: border-box;
     }
 
     body {
-      background-color: #0a0a0c;
-      color: #e2e8f0;
-      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
       padding: 0;
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
 
     .app-container {
       max-width: 600px;
       margin: 0 auto;
       padding: 0;
-      min-height: 100vh
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     .topbar {
-      background: linear-gradient(135deg, #13131f, #1a1a2e);
+      background: rgba(10, 10, 10, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
-      padding: 14px 20px;
+      padding: 16px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       position: sticky;
       top: 0;
       z-index: 100;
-      gap: 12px
+      gap: 12px;
     }
 
     .topbar-brand {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-weight: 700;
-      font-size: 1.1rem;
-      color: #fff
+      gap: 12px;
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff, #a0a0a0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .topbar-brand span {
-      font-size: 1.5rem
+      font-size: 1.6rem;
+      -webkit-text-fill-color: initial;
     }
 
     .badge-mode {
-      padding: 4px 10px;
+      padding: 4px 12px;
       border-radius: 20px;
       font-size: 11px;
-      font-weight: 600;
-      letter-spacing: .5px
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
     }
 
     .badge-realtime {
-      background: rgba(16, 185, 129, .2);
+      background: rgba(52, 211, 153, 0.15);
       color: #34d399;
-      border: 1px solid rgba(16, 185, 129, .3)
+      border: 1px solid rgba(52, 211, 153, 0.3);
     }
 
     .badge-historical {
-      background: rgba(245, 158, 11, .2);
+      background: rgba(251, 191, 36, 0.15);
       color: #fbbf24;
-      border: 1px solid rgba(245, 158, 11, .3)
+      border: 1px solid rgba(251, 191, 36, 0.3);
     }
 
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      padding: 16px
+      gap: 16px;
+      padding: 24px;
     }
 
     .stat-card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--r);
-      padding: 16px;
+      padding: 20px;
       text-align: center;
-      transition: transform .2s;
-      cursor: pointer
+      transition: transform .2s, box-shadow .2s;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .stat-card:hover {
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
     }
 
     .stat-card:active {
-      transform: scale(0.97)
+      transform: scale(0.97);
     }
 
     .stat-val {
-      font-size: 1.4rem;
+      font-size: 1.7rem;
       font-weight: 800;
-      background: linear-gradient(135deg, #fff, var(--muted));
+      background: linear-gradient(135deg, #fff, #888);
       -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
     }
 
     .stat-lbl {
       font-size: 11px;
       color: var(--muted);
-      margin-top: 4px;
-      font-weight: 500;
+      margin-top: 6px;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 1px
+      letter-spacing: 1px;
     }
 
     .section {
-      padding: 0 16px 16px
+      padding: 0 24px 24px;
+      flex: 1;
     }
 
     .section-title {
@@ -160,31 +175,32 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 1px;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
-      gap: 8px
+      gap: 10px;
     }
 
     .date-clickable {
       cursor: pointer;
       background: rgba(255, 255, 255, 0.05);
-      padding: 4px 10px;
+      padding: 6px 12px;
       border-radius: 8px;
       transition: all .2s;
-      border: 1px solid transparent
+      border: 1px solid transparent;
+      color: #fff;
     }
 
     .date-clickable:hover {
       background: rgba(255, 255, 255, 0.1);
-      border-color: var(--p)
+      border-color: var(--border);
     }
 
     .companies-wrap {
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      transition: opacity .3s ease-out
+      gap: 20px;
+      transition: opacity .3s ease-out;
     }
 
     .company-card {
@@ -192,157 +208,167 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
       border: 1px solid var(--border);
       border-radius: var(--r);
       overflow: hidden;
-      box-shadow: var(--shadow)
+      box-shadow: var(--shadow);
     }
 
     .company-header {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 14px 16px;
+      gap: 12px;
+      padding: 16px 20px;
       background: var(--card2);
       border-bottom: 1px solid var(--border);
       cursor: pointer;
-      transition: background .2s
+      transition: background .2s;
     }
 
     .company-header:hover {
-      background: rgba(255, 255, 255, 0.03)
+      background: rgba(255, 255, 255, 0.03);
     }
 
     .company-dot {
-      width: 10px;
-      height: 10px;
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
-      flex-shrink: 0
+      flex-shrink: 0;
+      box-shadow: 0 0 10px rgba(255,255,255,0.2);
     }
 
     .company-name {
       font-weight: 700;
-      font-size: .95rem;
-      flex: 1
+      font-size: 1.05rem;
+      flex: 1;
+      letter-spacing: -0.3px;
     }
 
     .draws-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
       gap: 1px;
-      background: var(--border)
+      background: var(--border);
     }
 
     .draw-block {
       background: var(--card2);
-      padding: 14px 16px;
+      padding: 20px;
       cursor: pointer;
-      transition: background .2s
+      transition: background .2s;
     }
 
     .draw-block:hover {
-      background: rgba(255, 255, 255, 0.05)
+      background: var(--card);
     }
 
     .draw-name {
-      font-size: .85rem;
+      font-size: .95rem;
       font-weight: 700;
       color: var(--text);
-      margin-bottom: 6px
+      margin-bottom: 8px;
     }
 
     .draw-time {
-      font-size: .7rem;
+      font-size: .75rem;
       color: var(--muted);
-      opacity: .8;
-      margin-bottom: 10px;
+      font-weight: 500;
+      margin-bottom: 14px;
       display: flex;
       align-items: center;
-      gap: 4px
+      gap: 6px;
     }
 
     .numbers-row {
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .num-ball {
-      width: 34px;
-      height: 34px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      font-size: .9rem;
+      font-size: 1rem;
       flex-shrink: 0;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2)
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.2s;
+    }
+    
+    .num-ball:hover {
+      transform: scale(1.1);
     }
 
     .num-special1 {
-      background: linear-gradient(135deg, #f6ca44, #f59e0b);
-      color: #000
+      background: linear-gradient(135deg, #FFD700, #F59E0B);
+      color: #451A03;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4), inset 0 2px 2px rgba(255,255,255,0.5);
     }
 
     .num-special2 {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: #fff
+      background: linear-gradient(135deg, #38BDF8, #3B82F6);
+      color: #FFFFFF;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4), inset 0 2px 2px rgba(255,255,255,0.3);
     }
 
     .num-special3 {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: #fff
+      background: linear-gradient(135deg, #34D399, #10B981);
+      color: #022C22;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4), inset 0 2px 2px rgba(255,255,255,0.4);
     }
 
     .num-normal {
-      background: var(--bg);
-      color: var(--text);
-      border: 1px solid var(--border)
+      background: linear-gradient(135deg, #27272A, #18181B);
+      color: #FFFFFF;
     }
 
     .empty {
       text-align: center;
-      padding: 60px 20px;
-      color: var(--muted)
+      padding: 80px 20px;
+      color: var(--muted);
     }
 
     .empty-icon {
-      font-size: 3rem;
-      margin-bottom: 16px;
-      opacity: 0.5
+      font-size: 3.5rem;
+      margin-bottom: 20px;
+      opacity: 0.6;
     }
 
     #toast {
       position: fixed;
-      bottom: 24px;
+      bottom: 30px;
       left: 50%;
       transform: translateX(-50%);
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 30px;
-      padding: 12px 24px;
+      padding: 14px 28px;
       font-size: 14px;
       font-weight: 600;
       z-index: 9999;
       opacity: 0;
       transition: opacity .3s;
       pointer-events: none;
-      box-shadow: var(--shadow)
+      box-shadow: var(--shadow);
     }
 
     #toast.show {
-      opacity: 1
+      opacity: 1;
     }
 
     .ai-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(102, 126, 234, .1);
-      border: 1px solid rgba(102, 126, 234, 0.2);
+      background: rgba(50, 145, 255, 0.1);
+      border: 1px solid rgba(50, 145, 255, 0.2);
       border-radius: 20px;
-      padding: 4px 12px;
+      padding: 6px 14px;
       font-size: 11px;
       color: var(--p);
-      font-weight: 700
+      font-weight: 700;
     }
 
     .ai-dot {
@@ -350,31 +376,24 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
       height: 6px;
       border-radius: 50%;
       background: var(--p);
-      box-shadow: 0 0 8px var(--p);
-      animation: pulse 2s infinite
+      box-shadow: 0 0 10px var(--p);
+      animation: pulse 2s infinite;
     }
 
     @keyframes pulse {
-
-      0%,
-      100% {
-        opacity: 1
-      }
-
-      50% {
-        opacity: .3
-      }
+      0%, 100% { opacity: 1; }
+      50% { opacity: .4; }
     }
 
     .fade-out {
-      opacity: 0
+      opacity: 0;
     }
 
     #calendarInput {
       position: absolute;
       visibility: hidden;
       top: 0;
-      left: 0
+      left: 0;
     }
 
     /* Modal Styles */
@@ -385,12 +404,13 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
       right: 0;
       bottom: 0;
       background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 10000;
-      padding: 16px
+      padding: 20px;
     }
 
     .modal-content {
@@ -398,64 +418,100 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
       border: 1px solid var(--border);
       border-radius: var(--r);
       width: 100%;
-      max-width: 480px;
+      max-width: 500px;
       max-height: 85vh;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      box-shadow: var(--shadow)
+      box-shadow: var(--shadow);
     }
 
     .modal-header {
-      padding: 18px 20px;
+      padding: 20px 24px;
       border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: var(--card2)
+      background: var(--card2);
     }
 
     .modal-body {
       overflow-y: auto;
-      padding: 10px 0
+      padding: 10px 0;
     }
 
     .modal-close {
       cursor: pointer;
       font-size: 1.5rem;
       opacity: 0.5;
-      line-height: 1
+      line-height: 1;
+      transition: opacity 0.2s;
     }
 
     .modal-close:hover {
-      opacity: 1
+      opacity: 1;
     }
 
     .history-item {
-      padding: 16px 20px;
+      padding: 20px 24px;
       border-bottom: 1px solid var(--border);
-      animation: slideIn .3s ease-out forwards
+      animation: slideIn .4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     .history-item:last-child {
-      border-bottom: none
+      border-bottom: none;
     }
 
     @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px)
-      }
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-      to {
-        opacity: 1;
-        transform: translateY(0)
-      }
+    /* Minimalist Footer */
+    .app-footer {
+      padding: 40px 24px 30px;
+      text-align: center;
+      margin-top: auto;
+    }
+
+    .footer-content {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      background: var(--card);
+      padding: 10px 24px;
+      border-radius: 30px;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+
+    .footer-content strong {
+      background: linear-gradient(135deg, #ffffff, #a0a0a0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .footer-dot {
+      color: var(--p);
+      font-size: 1.2rem;
+      line-height: 0;
     }
 
     @media(max-width:480px) {
       .draws-grid {
-        grid-template-columns: 1fr
+        grid-template-columns: 1fr;
+      }
+      .footer-content {
+        flex-direction: column;
+        gap: 6px;
+        padding: 14px 24px;
+      }
+      .footer-dot {
+        display: none;
       }
     }
   </style>
@@ -465,7 +521,7 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
 
   <!-- Topbar -->
   <div class="topbar">
-    <div class="topbar-brand"><span>🎰</span> Lottery RD</div>
+    <div class="topbar-brand"><span>🎰</span>LotteryApp</div>
   </div>
 
   <?php
@@ -725,6 +781,13 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
       } catch (e) { }
     }, 5000); // Revisa silenciosamente cada 5 segundos
   </script>
+  <footer class="app-footer">
+    <div class="footer-content">
+      <span>Desarrollado por <strong>Rlabs</strong></span>
+      <span class="footer-dot">•</span>
+      <span>&copy; 2026 Todos los derechos reservados</span>
+    </div>
+  </footer>
 </body>
 
 </html>

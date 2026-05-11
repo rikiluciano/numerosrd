@@ -1,4 +1,4 @@
-package com.lotteryrd.scraper
+package com.rlabs.lotteryapp
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -16,7 +16,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
-import com.lotteryrd.scraper.databinding.ActivityMainBinding
+import com.rlabs.lotteryapp.databinding.ActivityMainBinding
 
 /**
  * MainActivity — Actividad principal con WebView

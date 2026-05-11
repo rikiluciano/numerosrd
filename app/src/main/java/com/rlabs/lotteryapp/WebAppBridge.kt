@@ -1,4 +1,4 @@
-package com.lotteryrd.scraper
+package com.rlabs.lotteryapp
 
 import android.content.Context
 import android.webkit.JavascriptInterface

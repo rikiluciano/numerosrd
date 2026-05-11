@@ -1,4 +1,4 @@
-package com.lotteryrd.scraper
+package com.rlabs.lotteryapp
 
 import android.annotation.SuppressLint
 import android.content.Intent

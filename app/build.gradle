@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.lotteryrd.scraper'
+    namespace 'com.rlabs.lotteryapp'
     compileSdk 35
 
     defaultConfig {
-        applicationId 'com.lotteryrd.scraper'
+        applicationId 'com.rlabs.lotteryapp'
         minSdk 26
         targetSdk 35
         versionCode System.env.GITHUB_RUN_NUMBER ? Integer.parseInt(System.env.GITHUB_RUN_NUMBER) : 1

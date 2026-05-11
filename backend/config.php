@@ -11,7 +11,7 @@ define('LOTTERY_SCRAPER', true);
 date_default_timezone_set('America/Santo_Domingo');
 
 // ── CONSTANTES GENERALES ──────────────────────────────────────────
-define('APP_NAME',    'Lottery Scraper RD');
+define('APP_NAME',    'LotteryApp');
 define('APP_VERSION', '4.1.0');
 define('APP_ENV',     'production');
 
