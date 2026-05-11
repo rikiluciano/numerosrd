@@ -1,57 +1,57 @@
 <?php
 /**
  * ===================================================================
- * GIT SYNC - Sistema de Auto-Actualización Silenciosa (VERSIÓN 4.5)
+ * GIT SYNC - Sistema de Auto-Actualización Silenciosa (VERSIÓN 4.6)
  * ===================================================================
  */
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Intentar resetear la memoria del servidor (OPcache)
-if (function_exists('opcache_reset')) {
-    @opcache_reset();
-}
+// COMANDO MAESTRO: Purga de LiteSpeed Cache y OPcache
+if (function_exists('opcache_reset')) @opcache_reset();
+header("X-LiteSpeed-Purge: *"); // Limpia todo el caché del servidor
 
 if (php_sapi_name() === 'cli' || isset($_GET['debug'])) {
     if (isset($_GET['check'])) {
         $file = dirname(__DIR__) . '/' . $_GET['check'];
         if (file_exists($file)) {
             header("Cache-Control: no-cache, no-store, must-revalidate");
-            echo "📄 <b>Archivo en disco:</b> " . $_GET['check'] . "<br>";
-            echo "<pre>" . htmlspecialchars(substr(file_get_contents($file), 0, 1000)) . "</pre>";
-        } else {
-            echo "❌ No existe: $file";
+            echo "📄 <b>Contenido real en disco:</b><br>";
+            echo "<pre>" . htmlspecialchars(file_get_contents($file)) . "</pre>";
         }
         exit;
     }
-    $result = syncWithGithub();
-    if (isset($_GET['debug'])) {
-        echo $result ? "<br>🏁 <b>ACTUALIZACIÓN Y LIMPIEZA COMPLETADA.</b>" : "<br>🏁 <b>AVISO:</b> Sin cambios.";
-    }
+    syncWithGithub();
+    echo "<br>🏁 <b>LIMPIEZA DE LITESPEED ENVIADA.</b> Revisa ahora con ?nocache=true";
 }
 
 function syncWithGithub() {
-    $repoUser = "rikiluciano"; 
-    $repoName = "numerosrd";    
-    $branch   = "main";
-    $token    = "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";
+    $repoUser = "rikiluciano"; $repoName = "numerosrd"; $branch = "main";
+    $token = "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";
     $versionFile = __DIR__ . '/version.json';
     
     $opts = ["http" => ["method" => "GET", "header" => ["User-Agent: PHP-AutoUpdate", "Authorization: token $token"]]];
     $context = stream_context_create($opts);
     
-    $apiUrl = "https://api.github.com/repos/$repoUser/$repoName/commits/$branch";
-    $response = @file_get_contents($apiUrl, false, $context);
+    $currentVersion = '';
+    if (file_exists($versionFile)) {
+        $versionData = json_decode(file_get_contents($versionFile), true);
+        if (isset($versionData['commit'])) {
+            $currentVersion = $versionData['commit'];
+        }
+    }
+
+    $response = @file_get_contents("https://api.github.com/repos/$repoUser/$repoName/commits/$branch", false, $context);
     if (!$response) return false;
-    $githubData = json_decode($response, true);
-    $latestCommit = $githubData['sha'];
+    $latestCommit = json_decode($response, true)['sha'];
 
-    $localData = file_exists($versionFile) ? json_decode(file_get_contents($versionFile), true) : ['commit' => ''];
-    if ($localData['commit'] === $latestCommit && !isset($_GET['force'])) return true;
+    // Si ya estamos en la última versión, no hacemos nada (a menos que se fuerce)
+    if ($currentVersion === $latestCommit && !isset($_GET['force'])) {
+        return true; 
+    }
 
-    $zipUrl = "https://api.github.com/repos/$repoUser/$repoName/zipball/$branch";
-    $zipContent = @file_get_contents($zipUrl, false, $context);
+    $zipContent = @file_get_contents("https://api.github.com/repos/$repoUser/$repoName/zipball/$branch", false, $context);
     if (!$zipContent) return false;
     
     $zipFile = __DIR__ . "/temp_update.zip";
@@ -70,40 +70,27 @@ function syncWithGithub() {
             $innerFolder = $subdirs[0];
             $rootDest = realpath(__DIR__ . "/../"); 
             $repoBackend = $innerFolder . "/backend";
-            
-            $source = is_dir($repoBackend) ? $repoBackend : $innerFolder;
-            smartCopy($source, $rootDest);
+            smartCopy(is_dir($repoBackend) ? $repoBackend : $innerFolder, $rootDest);
         }
-        
-        deleteDir($tempFolder);
-        unlink($zipFile);
-        
-        // Limpiar caché de archivos después de copiar
+        deleteDir($tempFolder); unlink($zipFile);
         clearstatcache();
-        
-        file_put_contents($versionFile, json_encode(['commit' => $latestCommit, 'date' => date('Y-m-d H:i:s')]));
+        file_put_contents($versionFile, json_encode(['commit' => $latestCommit]));
         return true;
     }
     return false;
 }
 
 function smartCopy($source, $dest) {
-    if (!is_dir($source)) return;
-    if (!is_dir($dest)) mkdir($dest, 0755, true);
-
     foreach (scandir($source) as $item) {
         if ($item == '.' || $item == '..') continue;
         $srcPath = $source . DIRECTORY_SEPARATOR . $item;
         $dstPath = $dest . DIRECTORY_SEPARATOR . $item;
-
         if (is_dir($srcPath)) {
             smartCopy($srcPath, $dstPath);
         } else {
-            if ($item == 'version.json') continue;
-            @unlink($dstPath); // Borrar antes de copiar para forzar refresco
+            @unlink($dstPath);
             if (@copy($srcPath, $dstPath)) {
-                @touch($dstPath); // Actualizar fecha de modificación
-                if (isset($_GET['debug'])) echo "✅ $item<br>";
+                @touch($dstPath, time() + 3600); // Forzar fecha futura para romper caché
             }
         }
     }
