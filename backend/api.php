@@ -72,8 +72,57 @@ try {
             $companySlug = $_GET['company'] ?? null;
             $limit       = min((int)($_GET['limit'] ?? 100), 500);
 
+            function getLogoUrl($companySlug, $drawName) {
+                if ($companySlug === 'leidsa' && $drawName === 'Loto Pool') return 'https://cdn-lottery.kiskoo.com/b9f95bbf6087f617f58efb5078ca5898.png';
+                $filename = '';
+                if ($companySlug === 'loto-real' && $drawName === 'Loto Pool') $filename = 'loto pool real';
+                else if ($drawName === 'Juega + Pega +') $filename = 'juega-mas-pega-mas';
+                else if ($drawName === 'Gana Más') $filename = 'gana-mas';
+                else if ($drawName === 'Lotería Nacional') $filename = 'loteria-nacional';
+                else if ($drawName === 'Pega 3 Más') $filename = 'pega-3-mas';
+                else if ($drawName === 'Quiniela Leidsa') $filename = 'quiniela-leidsa';
+                else if ($drawName === 'Super Kino TV') $filename = 'super-kino';
+                else if ($drawName === 'Loto - Super Loto Más') $filename = 'loto-leidsa';
+                else if ($drawName === 'Quiniela Real') $filename = 'loteria-real';
+                else if ($drawName === 'Loto Real') $filename = 'loto-real';
+                else if ($drawName === 'Loto Pool Noche') $filename = 'loto-pool-noche';
+                else if ($drawName === 'Quiniela Loteka') $filename = 'quiniela-loteka';
+                else if ($drawName === 'Mega Chances') $filename = 'mega-chances';
+                else if ($drawName === 'MegaLotto') $filename = 'mega-lotto-loteka';
+                else if ($drawName === 'Florida Día') $filename = 'florida-dia';
+                else if ($drawName === 'Florida Noche') $filename = 'florida-noche';
+                else if ($drawName === 'New York Tarde') $filename = 'new-york-tarde';
+                else if ($drawName === 'New York Noche') $filename = 'new-york-noche';
+                else if ($drawName === 'La Primera Día') $filename = 'la-primera-dia';
+                else if ($drawName === 'Primera Noche') $filename = 'la-primera-noche';
+                else if (strpos($drawName, 'La Suerte') !== false) $filename = 'la-suerte-dominicana';
+                else if ($drawName === 'Quiniela LoteDom') $filename = 'quiniela-lotedom';
+                else if ($drawName === 'El Quemaito Mayor') $filename = 'el-quemaito-mayor';
+                else if (strpos($drawName, 'Anguila') !== false) $filename = 'anguila-lottery';
+                else if (strpos($drawName, 'King Lottery') !== false) $filename = 'king-lottery';
+                return $filename ? "https://cdn-lottery.kiskoo.com/loterias-dominicanas/{$filename}.png" : '';
+            }
+
             if ($date) {
                 $results = $db->getResultsByDateGrouped($date);
+                $formattedDate = date('d/m/Y', strtotime($date));
+
+                foreach ($results as $slug => &$comp) {
+                    foreach ($comp['draws'] as &$d) {
+                        $logoUrl = getLogoUrl($slug, $d['drawName']);
+                        $logoHtml = $logoUrl ? "<img src='{$logoUrl}' style='max-width:60px; max-height:25px; object-fit:contain; position:absolute; top:12px; right:12px;' alt='logo'>" : "";
+                        $d['drawTime'] = "<style>.draw-time { font-size: 0 !important; } .draw-time-content { font-size: 13px !important; color: #A0AEC0; }</style><span class='draw-time-content'>📅 {$formattedDate}</span>{$logoHtml}";
+                        
+                        $celestial = ['special1', 'special2', 'special3', 'normal', 'normal', 'normal', 'normal'];
+                        $newTypes = [];
+                        foreach ($d['numbers'] as $idx => $n) {
+                            $newTypes[] = $celestial[$idx % count($celestial)];
+                        }
+                        $d['numberTypes'] = $newTypes;
+                    }
+                }
+                unset($comp);
+
                 echo json_encode([
                     'success' => true,
                     'date'    => $date,
@@ -136,6 +185,17 @@ try {
             $limit       = min((int)($_GET['limit'] ?? 10), 50);
 
             $data = $db->getHistory($limit, $companySlug, $drawName);
+            
+            foreach ($data as &$d) {
+                $celestial = ['special1', 'special2', 'special3', 'normal', 'normal', 'normal', 'normal'];
+                $newTypes = [];
+                foreach ($d['numbers'] as $idx => $n) {
+                    $newTypes[] = $celestial[$idx % count($celestial)];
+                }
+                $d['number_types'] = $newTypes;
+            }
+            unset($d);
+
             echo json_encode([
                 'success' => true,
                 'count'   => count($data),
