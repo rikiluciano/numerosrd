@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Lottery Scraper RD</string>
+    <string name="app_name">LotteryApp</string>
     <string name="app_version">v1.0.0</string>
     <string name="server_url_hint">URL del Servidor</string>
     <string name="error_no_connection">Sin conexión al servidor</string>

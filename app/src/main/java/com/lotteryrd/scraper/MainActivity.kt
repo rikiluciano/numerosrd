@@ -43,7 +43,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
-        supportActionBar?.title = "🎰 Lottery Scraper RD"
+        supportActionBar?.title = "🎰 LotteryApp"
+        supportActionBar?.elevation = 0f
 
         // Cargar URL configurada o usar la predeterminada
         val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
