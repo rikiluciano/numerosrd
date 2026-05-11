@@ -68,7 +68,7 @@ function syncWithGithub() {
         $subdirs = glob($tempFolder . '*', GLOB_ONLYDIR);
         if (!empty($subdirs)) {
             $innerFolder = $subdirs[0];
-            $rootDest = realpath(__DIR__ . "/../"); 
+            $rootDest = __DIR__; 
             $repoBackend = $innerFolder . "/backend";
             smartCopy(is_dir($repoBackend) ? $repoBackend : $innerFolder, $rootDest);
         }
@@ -81,6 +81,9 @@ function syncWithGithub() {
 }
 
 function smartCopy($source, $dest) {
+    if (!is_dir($dest)) {
+        @mkdir($dest, 0755, true);
+    }
     foreach (scandir($source) as $item) {
         if ($item == '.' || $item == '..') continue;
         $srcPath = $source . DIRECTORY_SEPARATOR . $item;
