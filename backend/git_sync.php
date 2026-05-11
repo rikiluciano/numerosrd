@@ -1,29 +1,33 @@
 <?php
 /**
  * ===================================================================
- * GIT SYNC - Sistema de Auto-Actualización Silenciosa (VERSIÓN 4.0)
+ * GIT SYNC - Sistema de Auto-Actualización Silenciosa (VERSIÓN 4.5)
  * ===================================================================
  */
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// --- EJECUCIÓN DIRECTA ---
+// Intentar resetear la memoria del servidor (OPcache)
+if (function_exists('opcache_reset')) {
+    @opcache_reset();
+}
+
 if (php_sapi_name() === 'cli' || isset($_GET['debug'])) {
     if (isset($_GET['check'])) {
         $file = dirname(__DIR__) . '/' . $_GET['check'];
         if (file_exists($file)) {
-            echo "📄 <b>Verificando archivo:</b> " . $_GET['check'] . "<br>";
+            header("Cache-Control: no-cache, no-store, must-revalidate");
+            echo "📄 <b>Archivo en disco:</b> " . $_GET['check'] . "<br>";
             echo "<pre>" . htmlspecialchars(substr(file_get_contents($file), 0, 1000)) . "</pre>";
         } else {
-            echo "❌ El archivo no existe en: $file";
+            echo "❌ No existe: $file";
         }
         exit;
     }
-    
     $result = syncWithGithub();
     if (isset($_GET['debug'])) {
-        echo $result ? "<br>🏁 <b>ACTUALIZACIÓN EXITOSA</b>. Revisa tu web ahora." : "<br>🏁 <b>AVISO:</b> Sin cambios o error.";
+        echo $result ? "<br>🏁 <b>ACTUALIZACIÓN Y LIMPIEZA COMPLETADA.</b>" : "<br>🏁 <b>AVISO:</b> Sin cambios.";
     }
 }
 
@@ -34,8 +38,6 @@ function syncWithGithub() {
     $token    = "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";
     $versionFile = __DIR__ . '/version.json';
     
-    if (isset($_GET['debug'])) echo "🚀 <b>Iniciando Sincronización Inteligente...</b><br>";
-
     $opts = ["http" => ["method" => "GET", "header" => ["User-Agent: PHP-AutoUpdate", "Authorization: token $token"]]];
     $context = stream_context_create($opts);
     
@@ -46,11 +48,7 @@ function syncWithGithub() {
     $latestCommit = $githubData['sha'];
 
     $localData = file_exists($versionFile) ? json_decode(file_get_contents($versionFile), true) : ['commit' => ''];
-    $force = isset($_GET['force']);
-    
-    if (isset($_GET['debug'])) echo "📦 GitHub: <code>" . substr($latestCommit,0,7) . "</code> | 🏠 Local: <code>" . substr($localData['commit'],0,7) . "</code><br>";
-
-    if ($localData['commit'] === $latestCommit && !$force) return true;
+    if ($localData['commit'] === $latestCommit && !isset($_GET['force'])) return true;
 
     $zipUrl = "https://api.github.com/repos/$repoUser/$repoName/zipball/$branch";
     $zipContent = @file_get_contents($zipUrl, false, $context);
@@ -71,20 +69,17 @@ function syncWithGithub() {
         if (!empty($subdirs)) {
             $innerFolder = $subdirs[0];
             $rootDest = realpath(__DIR__ . "/../"); 
-            
-            // INTELIGENCIA DE CARPETAS:
-            // Si el repo tiene una carpeta 'backend', y nosotros estamos en un hosting que actúa como raíz
             $repoBackend = $innerFolder . "/backend";
-            if (is_dir($repoBackend)) {
-                if (isset($_GET['debug'])) echo "✨ <b>Detectada carpeta 'backend' en el repo. Sincronizando contenido...</b><br>";
-                smartCopy($repoBackend, $rootDest);
-            } else {
-                smartCopy($innerFolder, $rootDest);
-            }
+            
+            $source = is_dir($repoBackend) ? $repoBackend : $innerFolder;
+            smartCopy($source, $rootDest);
         }
         
         deleteDir($tempFolder);
         unlink($zipFile);
+        
+        // Limpiar caché de archivos después de copiar
+        clearstatcache();
         
         file_put_contents($versionFile, json_encode(['commit' => $latestCommit, 'date' => date('Y-m-d H:i:s')]));
         return true;
@@ -102,12 +97,14 @@ function smartCopy($source, $dest) {
         $dstPath = $dest . DIRECTORY_SEPARATOR . $item;
 
         if (is_dir($srcPath)) {
-            if (isset($_GET['debug'])) echo "📁 Carpeta: <b>$item</b><br>";
             smartCopy($srcPath, $dstPath);
         } else {
             if ($item == 'version.json') continue;
-            $success = @copy($srcPath, $dstPath);
-            if (isset($_GET['debug'])) echo ($success ? "  ✅" : "  ❌") . " $item<br>";
+            @unlink($dstPath); // Borrar antes de copiar para forzar refresco
+            if (@copy($srcPath, $dstPath)) {
+                @touch($dstPath); // Actualizar fecha de modificación
+                if (isset($_GET['debug'])) echo "✅ $item<br>";
+            }
         }
     }
 }
