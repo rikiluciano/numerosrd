@@ -51,7 +51,7 @@ $displayDate = !empty($todayResults) ? $today : ($lastDate ?? $today);
     }
 
     body {
-      background-color: #0f172a;
+      background-color: #1e1b4b;
       color: #e2e8f0;
       font-family: 'Inter', sans-serif;
       margin: 0;
